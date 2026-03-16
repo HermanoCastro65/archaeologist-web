@@ -33,11 +33,16 @@ model RepositoryScan {
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id])
 
-  status     String
-  filesCount Int    @default(0)
+  status String
+
+  filesCount Int @default(0)
 
   startedAt  DateTime  @default(now())
   finishedAt DateTime?
+
+  files RepositoryFile[]
+
+  @@index([repositoryId])
 }
 
 model RepositoryFile {
@@ -46,6 +51,17 @@ model RepositoryFile {
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id])
 
+  scanId String
+  scan   RepositoryScan @relation(fields: [scanId], references: [id])
+
   path String
   size Int
+
+  hash String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([repositoryId, path])
+  @@index([repositoryId])
+  @@index([scanId])
 }

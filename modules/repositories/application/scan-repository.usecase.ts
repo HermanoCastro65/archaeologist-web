@@ -31,9 +31,20 @@ export class ScanRepositoryUseCase {
     for (const file of files) {
       const stats = await fs.stat(file)
 
-      await prisma.repositoryFile.create({
-        data: {
+      await prisma.repositoryFile.upsert({
+        where: {
+          repositoryId_path: {
+            repositoryId,
+            path: file,
+          },
+        },
+        update: {
+          size: stats.size,
+          scanId: scan.id,
+        },
+        create: {
           repositoryId,
+          scanId: scan.id,
           path: file,
           size: stats.size,
         },
