@@ -12,3 +12,16 @@ model HealthCheck {
   message   String
   createdAt DateTime @default(now())
 }
+
+model Repository {
+
+  id        String   @id @default(uuid())
+  url       String   @unique
+
+  owner     String
+  name      String
+  provider  String   @default("github")
+
+  createdAt DateTime @default(now())
+
+}
