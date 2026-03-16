@@ -16,3 +16,23 @@ body {
 * {
   border-color: #1f2a1f;
 }
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
+a {
+  transition: all 0.2s ease;
+}
+
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: scale(0.97);
+}

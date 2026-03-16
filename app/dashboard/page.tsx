@@ -39,9 +39,9 @@ export default function Dashboard() {
   if (!session) return null
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       <div>
-        <h1 className="text-3xl font-bold text-matrix">Repository Scanner</h1>
+        <h1 className="text-4xl font-bold text-matrix">Repository Scanner</h1>
 
         <p className="text-graySoft mt-2">Scan Git repositories and index their structure</p>
       </div>

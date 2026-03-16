@@ -1,16 +1,22 @@
+import Link from 'next/link'
+
 export default function Home() {
   return (
-    <div className="space-y-8">
-      <h1 className="text-4xl font-bold text-matrix">Archaeologist</h1>
+    <div className="space-y-10">
+      <div className="space-y-4">
+        <h1 className="text-5xl font-bold text-matrix">Archaeologist Web</h1>
 
-      <p className="text-graySoft max-w-xl">Analyze and index Git repositories automatically.</p>
+        <p className="text-graySoft max-w-xl text-lg">
+          Analyze, scan and index Git repositories automatically.
+        </p>
+      </div>
 
-      <a
+      <Link
         href="/dashboard"
-        className="inline-block bg-purple px-6 py-3 rounded font-semibold hover:bg-matrixSoft"
+        className="inline-block bg-gradient-to-r from-green-500 to-emerald-400 text-black px-6 py-3 rounded font-semibold hover:opacity-90"
       >
         Open Dashboard
-      </a>
+      </Link>
     </div>
   )
 }

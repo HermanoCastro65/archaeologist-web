@@ -6,11 +6,8 @@ export default function LoginButton() {
   return (
     <button
       onClick={() => signIn('github')}
-      className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-900"
+      className="flex items-center gap-2 px-4 py-2 bg-black border border-border rounded hover:bg-gray-900"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-5 h-5">
-        <path d="M12 .5C5.73.5.75 5.48.75 11.75c0 5.08 3.29 9.39 7.86 10.9.57.1.78-.25.78-.55v-1.94c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.27-1.68-1.27-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.74 2.67 1.24 3.32.95.1-.74.4-1.24.73-1.52-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.15 1.18a10.96 10.96 0 012.87-.39c.97 0 1.95.13 2.87.39 2.19-1.49 3.15-1.18 3.15-1.18.62 1.57.23 2.73.11 3.02.73.81 1.18 1.83 1.18 3.09 0 4.43-2.69 5.41-5.25 5.7.41.35.78 1.05.78 2.12v3.15c0 .31.21.66.79.55 4.56-1.52 7.85-5.82 7.85-10.9C23.25 5.48 18.27.5 12 .5z" />
-      </svg>
       Sign in with GitHub
     </button>
   )

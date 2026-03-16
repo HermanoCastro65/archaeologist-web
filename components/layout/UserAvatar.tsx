@@ -9,8 +9,9 @@ export default function UserAvatar() {
 
   return (
     <div className="flex items-center gap-2">
-      <img src={data.user.image!} className="w-8 h-8 rounded-full" />
-      <span>{data.user.name}</span>
+      <img src={data.user.image!} className="w-8 h-8 rounded-full border border-border" />
+
+      <span className="text-sm">{data.user.name}</span>
     </div>
   )
 }
