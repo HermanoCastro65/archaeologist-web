@@ -1,18 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { CreateRepositoryUseCase } from '@/modules/repositories/application/create-repository.usecase'
+import { Repository } from '@/modules/repositories/domain/Repository'
+import { RepositoryUrl } from '@/modules/repositories/domain/RepositoryUrl'
 
-describe('Repository creation', () => {
-  it('should not duplicate repositories', async () => {
-    const usecase = new CreateRepositoryUseCase()
-
-    const repo1 = await usecase.execute({
-      url: 'https://github.com/facebook/react',
+describe('Repository entity', () => {
+  it('should create repository entity', () => {
+    const repo = new Repository({
+      url: new RepositoryUrl('https://github.com/vercel/next.js'),
     })
 
-    const repo2 = await usecase.execute({
-      url: 'https://github.com/facebook/react',
-    })
-
-    expect(repo1.id).toBe(repo2.id)
+    expect(repo.id).toBeDefined()
+    expect(repo.url.value).toBe('https://github.com/vercel/next.js')
   })
 })

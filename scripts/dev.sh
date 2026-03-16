@@ -11,18 +11,18 @@ echo ""
 echo "Stopping Docker containers..."
 docker compose -f docker/docker-compose.yml down
 
-echo "Cleaning database volumes..."
+echo "Removing Docker volumes..."
 docker compose -f docker/docker-compose.yml down -v
 
 echo "Starting Docker containers..."
 docker compose -f docker/docker-compose.yml up -d
 
 echo ""
-echo "Waiting for database..."
-sleep 5
+echo "Waiting for database to start..."
+sleep 10
 
 echo ""
-echo "Applying Prisma migrations..."
+echo "Running Prisma migrations..."
 npx prisma migrate deploy
 
 echo ""
@@ -31,8 +31,8 @@ npx prisma generate
 
 echo ""
 echo "Running tests..."
-npm run test -- --run
+yarn test --run
 
 echo ""
-echo "Starting development server..."
-npm run dev
+echo "Starting Next.js dev server..."
+yarn dev

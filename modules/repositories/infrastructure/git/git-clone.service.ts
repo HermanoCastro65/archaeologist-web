@@ -4,19 +4,16 @@ import fs from 'fs/promises'
 
 export class GitCloneService {
   async cloneRepository(url: string, repositoryId: string) {
-    const workspace = path.join(process.cwd(), 'workspace', repositoryId)
+    const workspaceRoot = path.resolve(process.cwd(), 'workspace')
+    const workspace = path.resolve(workspaceRoot, repositoryId)
 
-    // remove workspace antigo
-    await fs.rm(workspace, {
-      recursive: true,
-      force: true,
-    })
+    await fs.rm(workspaceRoot, { recursive: true, force: true })
 
-    await fs.mkdir(workspace, { recursive: true })
+    await fs.mkdir(workspaceRoot, { recursive: true })
 
-    const git = simpleGit()
+    const git = simpleGit(workspaceRoot)
 
-    await git.clone(url, workspace)
+    await git.clone(url, repositoryId, ['--depth', '1'])
 
     return workspace
   }
