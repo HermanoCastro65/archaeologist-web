@@ -1,5 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
+import { shouldIgnore } from './file-filter'
 
 export class WorkspaceManager {
   async listFiles(directory: string): Promise<string[]> {
@@ -10,6 +11,8 @@ export class WorkspaceManager {
 
       for (const entry of entries) {
         const fullPath = path.join(dir, entry.name)
+
+        if (shouldIgnore(fullPath)) continue
 
         if (entry.isDirectory()) {
           await walk(fullPath)

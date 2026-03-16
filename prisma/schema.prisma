@@ -25,3 +25,30 @@ model Repository {
   createdAt DateTime @default(now())
 
 }
+
+model RepositoryScan {
+
+  id           String   @id @default(uuid())
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+
+  status       String
+  filesCount   Int      @default(0)
+
+  startedAt    DateTime @default(now())
+  finishedAt   DateTime?
+
+}
+
+model RepositoryFile {
+
+  id        String @id @default(uuid())
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+
+  path      String
+  size      Int
+
+}
