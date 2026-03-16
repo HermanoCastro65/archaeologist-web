@@ -1,18 +1,14 @@
-import { describe, it, expect } from "vitest"
-import { Repository } from "@/modules/repositories/domain/Repository"
-import { RepositoryUrl } from "@/modules/repositories/domain/RepositoryUrl"
+import { describe, it, expect } from 'vitest'
+import { Repository } from '@/modules/repositories/domain/Repository'
+import { RepositoryUrl } from '@/modules/repositories/domain/RepositoryUrl'
 
-describe("Repository entity", () => {
-
-  it("should create repository entity", () => {
-
+describe('Repository entity', () => {
+  it('should create repository entity', () => {
     const repo = new Repository({
-      url: new RepositoryUrl("https://github.com/vercel/next.js")
+      url: new RepositoryUrl('https://github.com/vercel/next.js'),
     })
 
     expect(repo.id).toBeDefined()
-    expect(repo.url.value).toBe("https://github.com/vercel/next.js")
-
+    expect(repo.url.value).toBe('https://github.com/vercel/next.js')
   })
-
 })

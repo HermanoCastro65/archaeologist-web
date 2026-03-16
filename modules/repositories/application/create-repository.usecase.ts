@@ -1,11 +1,9 @@
-import { prisma } from "@/lib/db/prisma"
-import { Repository } from "../domain/Repository"
-import { RepositoryUrl } from "../domain/RepositoryUrl"
+import { prisma } from '@/lib/db/prisma'
+import { Repository } from '../domain/Repository'
+import { RepositoryUrl } from '../domain/RepositoryUrl'
 
 export class CreateRepositoryUseCase {
-
   async execute(input: { url: string }): Promise<Repository> {
-
     const repoUrl = new RepositoryUrl(input.url)
 
     const existing = await prisma.repository.findUnique({
@@ -25,7 +23,6 @@ export class CreateRepositoryUseCase {
     })
 
     try {
-
       await prisma.repository.create({
         data: {
           id: repository.id,
@@ -37,15 +34,13 @@ export class CreateRepositoryUseCase {
       })
 
       return repository
-
     } catch {
-
       const repo = await prisma.repository.findUnique({
         where: { url: repoUrl.value },
       })
 
       if (!repo) {
-        throw new Error("Failed to create repository")
+        throw new Error('Failed to create repository')
       }
 
       return new Repository({
