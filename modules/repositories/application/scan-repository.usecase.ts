@@ -28,28 +28,23 @@ export class ScanRepositoryUseCase {
 
     const files = await manager.listFiles(workspace)
 
+    const batch = []
+
     for (const file of files) {
       const stats = await fs.stat(file)
 
-      await prisma.repositoryFile.upsert({
-        where: {
-          repositoryId_path: {
-            repositoryId,
-            path: file,
-          },
-        },
-        update: {
-          size: stats.size,
-          scanId: scan.id,
-        },
-        create: {
-          repositoryId,
-          scanId: scan.id,
-          path: file,
-          size: stats.size,
-        },
+      batch.push({
+        repositoryId,
+        scanId: scan.id,
+        path: file,
+        size: stats.size,
       })
     }
+
+    await prisma.repositoryFile.createMany({
+      data: batch,
+      skipDuplicates: true,
+    })
 
     await prisma.repositoryScan.update({
       where: { id: scan.id },
