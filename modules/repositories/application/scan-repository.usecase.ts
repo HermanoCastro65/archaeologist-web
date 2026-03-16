@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/prisma'
 import { GitCloneService } from '../infrastructure/git/git-clone.service'
 import { WorkspaceManager } from '../infrastructure/workspace/workspace-manager'
 import fs from 'fs/promises'
+import path from 'path'
 
 export class ScanRepositoryUseCase {
   async execute(repositoryId: string) {
@@ -36,28 +37,30 @@ export class ScanRepositoryUseCase {
       batch.push({
         repositoryId,
         scanId: scan.id,
-        path: file,
+        path: path.relative(workspace, file),
         size: stats.size,
       })
     }
 
-    await prisma.repositoryFile.createMany({
-      data: batch,
-      skipDuplicates: true,
-    })
+    if (batch.length > 0) {
+      await prisma.repositoryFile.createMany({
+        data: batch,
+        skipDuplicates: true,
+      })
+    }
 
     await prisma.repositoryScan.update({
       where: { id: scan.id },
       data: {
         status: 'finished',
-        filesCount: files.length,
+        filesCount: batch.length,
         finishedAt: new Date(),
       },
     })
 
     return {
       scanId: scan.id,
-      filesIndexed: files.length,
+      filesIndexed: batch.length,
     }
   }
 }
