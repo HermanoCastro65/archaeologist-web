@@ -1,18 +1,31 @@
-version: '3'
+version: "3"
 
 services:
-  postgres:
+  postgres_dev:
     image: postgres:15
-    container_name: archaeologist-db
+    container_name: archaeologist-dev-db
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: archaeologist
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
+
+  postgres_test:
+    image: postgres:15
+    container_name: archaeologist-test-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: archaeologist_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  postgres_dev_data:
