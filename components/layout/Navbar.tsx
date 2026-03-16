@@ -12,45 +12,40 @@ export default function Navbar() {
 
   return (
     <header className="border-b border-border bg-panel">
-      <div className="relative w-full flex items-center min-h-[140px]">
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden xl:block">
+      <div className="max-w-6xl mx-auto pl-2 pr-6 flex items-center justify-between h-[120px]">
+        <Link href="/" className="flex items-center h-full">
           <Image
             src="/logo-pixel-art.png"
-            width={400}
-            height={360}
             alt="Archaeologist logo"
+            width={600}
+            height={520}
             priority
+            className="h-[200px] w-auto object-contain -ml-6"
           />
-        </div>
+        </Link>
 
-        <div className="max-w-6xl mx-auto w-full px-6 flex items-center justify-between">
-          <Link href="/" className="text-matrix font-bold text-2xl tracking-wide">
-            Archaeologist
+        <nav className="flex items-center gap-6 text-sm text-graySoft">
+          <Link href="/" className="hover:text-white transition">
+            Home
           </Link>
 
-          <nav className="flex items-center gap-6 text-sm text-graySoft">
-            <Link href="/" className="hover:text-white transition">
-              Home
-            </Link>
+          <Link href="/dashboard" className="hover:text-white transition">
+            Dashboard
+          </Link>
 
-            <Link href="/dashboard" className="hover:text-white transition">
-              Dashboard
-            </Link>
+          <Link href="/repositories" className="hover:text-white transition">
+            Repositories
+          </Link>
 
-            <Link href="/repositories" className="hover:text-white transition">
-              Repositories
-            </Link>
-
-            {data ? (
-              <div className="flex items-center gap-4">
-                <UserAvatar />
-                <LogoutButton />
-              </div>
-            ) : (
-              <LoginButton />
-            )}
-          </nav>
-        </div>
+          {data ? (
+            <div className="flex items-center gap-4">
+              <UserAvatar />
+              <LogoutButton />
+            </div>
+          ) : (
+            <LoginButton />
+          )}
+        </nav>
       </div>
     </header>
   )
