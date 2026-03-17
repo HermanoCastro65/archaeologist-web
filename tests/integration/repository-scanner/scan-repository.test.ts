@@ -1,14 +1,24 @@
 import { describe, it, expect } from 'vitest'
+import { prisma } from '@/lib/db/prisma'
 import { CreateRepositoryUseCase } from '@/modules/repositories/application/create-repository.usecase'
 import { ScanRepositoryUseCase } from '@/modules/repositories/application/scan-repository.usecase'
-import { prisma } from '@/lib/db/prisma'
+import { randomUUID } from 'crypto'
 
 describe('Repository Scanner', () => {
   it('should clone repository and store files', async () => {
-    const create = new CreateRepositoryUseCase()
+    const user = await prisma.user.create({
+      data: {
+        id: randomUUID(),
+        email: `${randomUUID()}@test.com`,
+        name: 'Scanner User',
+      },
+    })
 
-    const repo = await create.execute({
+    const createRepo = new CreateRepositoryUseCase()
+
+    const repo = await createRepo.execute({
       url: 'https://github.com/octocat/Hello-World',
+      userId: user.id,
     })
 
     const scanner = new ScanRepositoryUseCase()

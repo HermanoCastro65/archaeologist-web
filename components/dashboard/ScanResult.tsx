@@ -1,21 +1,21 @@
 import Card from '../ui/Card'
 
 export default function ScanResult({
-  repositoryId,
+  repositoryName,
   files,
 }: {
-  repositoryId: string
+  repositoryName: string
   files: number
 }) {
   return (
     <Card>
-      <div className="text-sm text-graySoft">Repository ID</div>
+      <div className="text-sm text-graySoft">Repository</div>
 
-      <div className="text-matrix font-mono text-sm mb-4 break-all">{repositoryId}</div>
+      <div className="text-matrixSoft font-mono text-sm mb-4 break-all">{repositoryName}</div>
 
       <div className="text-sm text-graySoft">Files indexed</div>
 
-      <div className="text-green-400 text-2xl font-semibold">{files}</div>
+      <div className="text-matrixSoft text-2xl font-semibold">{files}</div>
     </Card>
   )
 }

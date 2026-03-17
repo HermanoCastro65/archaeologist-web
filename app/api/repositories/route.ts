@@ -1,28 +1,19 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/route'
-
+import { authOptions } from '@/lib/auth'
 import { CreateRepositoryUseCase } from '@/modules/repositories/application/create-repository.usecase'
 import { ScanRepositoryUseCase } from '@/modules/repositories/application/scan-repository.usecase'
 
-function isValidGitRepository(url: string) {
-  return /^https:\/\/github\.com\/[^\/]+\/[^\/]+/.test(url)
-}
-
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { url } = await req.json()
+
   try {
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { url } = await req.json()
-
-    if (!isValidGitRepository(url)) {
-      return NextResponse.json({ error: 'Invalid GitHub repository URL' }, { status: 400 })
-    }
-
     const createRepo = new CreateRepositoryUseCase()
 
     const repository = await createRepo.execute({
@@ -36,14 +27,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       repositoryId: repository.id,
+      repositoryName: `${repository.owner}/${repository.name}`,
       files: result.filesIndexed,
     })
-  } catch (error) {
-    console.error(error)
-
+  } catch (error: any) {
     return NextResponse.json(
       {
-        error: 'Repository not found or cannot be cloned',
+        error: error?.message || 'Repository not found or cannot be cloned',
       },
       { status: 400 }
     )
