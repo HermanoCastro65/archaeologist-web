@@ -22,7 +22,7 @@ export class CreateRepositoryUseCase {
       return new Repository({
         id: existing.id,
         url: repoUrl,
-        userId: existing.userId ?? input.userId,
+        userId: existing.userId as string,
         createdAt: existing.createdAt,
       })
     }

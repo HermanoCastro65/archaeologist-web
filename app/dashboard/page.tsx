@@ -1,56 +1,67 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import RepositoryForm from '@/components/dashboard/RepositoryForm'
-import ScanResult from '@/components/dashboard/ScanResult'
 
-export default function Dashboard() {
-  const { data: session } = useSession()
+export default function DashboardPage() {
+  const [result, setResult] = useState<{
+    repositoryId: string
+    repositoryName: string
+    files: number
+  } | null>(null)
 
-  const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function scan(url: string) {
     setError(null)
+    setResult(null)
 
     const res = await fetch('/api/repositories', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
     })
 
-    const data = await res.json().catch(() => ({}))
+    let data: any = null
+
+    try {
+      data = await res.json()
+    } catch {
+      setError('Unexpected error')
+      return
+    }
 
     if (!res.ok) {
-      setError(data.error ?? 'Failed to scan repository')
+      setError(data?.error ?? 'Failed to scan repository')
       return
     }
 
     setResult({
       repositoryId: data.repositoryId,
+      repositoryName: data.repositoryName,
       files: data.files,
     })
   }
 
-  if (!session) return null
-
   return (
-    <div className="space-y-12">
-      <div>
-        <h1 className="text-4xl font-bold text-matrix">Repository Scanner</h1>
+    <div>
+      <h1 className="text-3xl font-bold text-primary mb-2">Repository Scanner</h1>
 
-        <p className="text-graySoft mt-2">Scan Git repositories and index their structure</p>
-      </div>
+      <p className="text-graySoft mb-6">Scan Git repositories and index their structure</p>
 
-      <RepositoryForm onScan={scan} />
+      <RepositoryForm onSubmit={scan} />
 
-      {error && <div className="text-red-400 text-sm font-medium">{error}</div>}
+      {error && <p className="text-red-400 mt-4">{error}</p>}
 
-      {result && <ScanResult repositoryId={result.repositoryId} files={result.files} />}
+      {result && (
+        <div className="mt-6 border border-border rounded-lg p-6 bg-panel/40">
+          <p className="text-sm text-graySoft mb-1">Repository</p>
+          <p className="text-primary font-mono mb-4">{result.repositoryName}</p>
+
+          <p className="text-sm text-graySoft mb-1">Files indexed</p>
+          <p className="text-primary text-xl font-bold">{result.files}</p>
+        </div>
+      )}
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { prisma } from '@/lib/db/prisma'
 import { GitCloneService } from '../infrastructure/git/git-clone.service'
 import { WorkspaceManager } from '../infrastructure/workspace/workspace-manager'
 import fs from 'fs/promises'
-import path from 'path'
 
 export class ScanRepositoryUseCase {
   async execute(repositoryId: string) {
@@ -21,46 +20,56 @@ export class ScanRepositoryUseCase {
       },
     })
 
-    const git = new GitCloneService()
+    try {
+      const git = new GitCloneService()
 
-    const workspace = await git.cloneRepository(repo.url, repo.id)
+      const workspace = await git.cloneRepository(repo.url, repo.id)
 
-    const manager = new WorkspaceManager()
+      const manager = new WorkspaceManager()
 
-    const files = await manager.listFiles(workspace)
+      const files = await manager.listFiles(workspace)
 
-    const batch = []
+      const batch = []
 
-    for (const file of files) {
-      const stats = await fs.stat(file)
+      for (const file of files) {
+        const stats = await fs.stat(file)
 
-      batch.push({
-        repositoryId,
-        scanId: scan.id,
-        path: path.relative(workspace, file),
-        size: stats.size,
-      })
-    }
+        batch.push({
+          repositoryId,
+          scanId: scan.id,
+          path: file,
+          size: stats.size,
+        })
+      }
 
-    if (batch.length > 0) {
       await prisma.repositoryFile.createMany({
         data: batch,
         skipDuplicates: true,
       })
-    }
 
-    await prisma.repositoryScan.update({
-      where: { id: scan.id },
-      data: {
-        status: 'finished',
-        filesCount: batch.length,
-        finishedAt: new Date(),
-      },
-    })
+      await prisma.repositoryScan.update({
+        where: { id: scan.id },
+        data: {
+          status: 'finished',
+          filesCount: files.length,
+          finishedAt: new Date(),
+        },
+      })
 
-    return {
-      scanId: scan.id,
-      filesIndexed: batch.length,
+      return {
+        scanId: scan.id,
+        filesIndexed: files.length,
+      }
+    } catch (error) {
+      await prisma.repositoryScan.update({
+        where: { id: scan.id },
+        data: {
+          status: 'failed',
+          finishedAt: new Date(),
+        },
+      })
+
+      throw error
     }
   }
 }

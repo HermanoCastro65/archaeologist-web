@@ -2,6 +2,7 @@ import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import AuthProvider from '@/components/layout/SessionProvider'
+import Sidebar from '@/components/sidebar/Sidebar'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +11,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <Navbar />
 
-          <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-10">{children}</main>
+          <Sidebar />
+
+          <main className="flex-1 ml-[260px] px-6 py-10 max-w-6xl">{children}</main>
 
           <Footer />
         </AuthProvider>

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Button from '../ui/Button'
 import Input from '../ui/Input'
 
-export default function RepositoryForm({ onScan }: { onScan: (url: string) => Promise<void> }) {
+export default function RepositoryForm({ onSubmit }: { onSubmit: (url: string) => Promise<void> }) {
   const [url, setUrl] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -12,11 +12,11 @@ export default function RepositoryForm({ onScan }: { onScan: (url: string) => Pr
 
     if (!url) return
 
-    await onScan(url)
+    await onSubmit(url)
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-3">
+    <form onSubmit={handleSubmit} className="flex w-full gap-3">
       <Input
         value={url}
         onChange={(e) => setUrl(e.target.value)}

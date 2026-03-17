@@ -66,19 +66,21 @@ model HealthCheck {
 
 model Repository {
   id  String @id @default(uuid())
-  url String @unique
+  url String
 
   owner    String
   name     String
   provider String @default("github")
 
-  userId String?
-  user   User? @relation(fields: [userId], references: [id])
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
   scans RepositoryScan[]
   files RepositoryFile[]
+
+  @@unique([url, userId])
 }
 
 model RepositoryScan {
