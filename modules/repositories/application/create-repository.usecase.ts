@@ -22,10 +22,19 @@ export class CreateRepositoryUseCase {
       return new Repository({
         id: existing.id,
         url: repoUrl,
-        userId: existing.userId as string,
+        userId: existing.userId,
         createdAt: existing.createdAt,
       })
     }
+
+    await prisma.user.upsert({
+      where: { id: input.userId },
+      update: {},
+      create: {
+        id: input.userId,
+        email: `${input.userId}@placeholder.com`,
+      },
+    })
 
     const repository = new Repository({
       url: repoUrl,
@@ -39,7 +48,7 @@ export class CreateRepositoryUseCase {
         owner: repository.owner,
         name: repository.name,
         provider: repository.provider,
-        userId: repository.userId,
+        userId: input.userId,
       },
     })
 

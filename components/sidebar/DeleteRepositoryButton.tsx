@@ -4,7 +4,6 @@ export default function DeleteRepositoryButton({ id, reload }: { id: string; rel
   async function handleDelete() {
     await fetch(`/api/repositories/${id}`, {
       method: 'DELETE',
-      credentials: 'include',
     })
 
     reload()

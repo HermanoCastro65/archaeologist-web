@@ -42,10 +42,12 @@ export class ScanRepositoryUseCase {
         })
       }
 
-      await prisma.repositoryFile.createMany({
-        data: batch,
-        skipDuplicates: true,
-      })
+      if (batch.length > 0) {
+        await prisma.repositoryFile.createMany({
+          data: batch,
+          skipDuplicates: true,
+        })
+      }
 
       await prisma.repositoryScan.update({
         where: { id: scan.id },
@@ -69,7 +71,7 @@ export class ScanRepositoryUseCase {
         },
       })
 
-      throw error
+      throw new Error('Repository not found or cannot be cloned')
     }
   }
 }
