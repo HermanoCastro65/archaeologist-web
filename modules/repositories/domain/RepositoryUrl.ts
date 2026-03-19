@@ -4,11 +4,9 @@ export class RepositoryUrl {
   public readonly name: string
 
   constructor(url: string) {
-    const normalized = this.normalize(url)
+    const normalized = RepositoryUrl.normalize(url)
 
-    const regex = /^https:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/i
-
-    const match = normalized.match(regex)
+    const match = normalized.match(RepositoryUrl.REGEX)
 
     if (!match) {
       throw new Error('Invalid GitHub repository URL')
@@ -19,7 +17,9 @@ export class RepositoryUrl {
     this.value = normalized
   }
 
-  private normalize(url: string): string {
+  private static readonly REGEX = /^https:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/i
+
+  private static normalize(url: string): string {
     let cleaned = url.trim()
 
     if (cleaned.endsWith('.git')) {

@@ -3,9 +3,10 @@ import { Repository } from '@/modules/repositories/domain/Repository'
 import { RepositoryUrl } from '@/modules/repositories/domain/RepositoryUrl'
 
 describe('Repository entity', () => {
-  it('should create repository entity', () => {
+  it('should create repository entity with defaults', () => {
     const repo = new Repository({
       url: new RepositoryUrl('https://github.com/vercel/next.js'),
+      userId: 'test-user',
     })
 
     expect(repo.id).toBeDefined()

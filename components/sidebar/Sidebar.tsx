@@ -7,6 +7,7 @@ type Repo = {
   id: string
   owner: string
   name: string
+  files: number
 }
 
 export default function Sidebar() {
@@ -14,12 +15,14 @@ export default function Sidebar() {
     typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('jsdom')
 
   const [repos, setRepos] = useState<Repo[]>(
-    isTest ? [{ id: 'test', owner: 'facebook', name: 'react' }] : []
+    isTest ? [{ id: 'test', owner: 'facebook', name: 'react', files: 10 }] : []
   )
 
   async function load() {
     try {
-      const res = await fetch('/api/repositories')
+      const res = await fetch('/api/repositories', {
+        cache: 'no-store',
+      })
 
       if (!res.ok) return
 
@@ -32,9 +35,16 @@ export default function Sidebar() {
   }
 
   useEffect(() => {
-    if (!isTest) {
+    if (!isTest) load()
+  }, [])
+
+  useEffect(() => {
+    function handleUpdate() {
       load()
     }
+
+    window.addEventListener('repository:updated', handleUpdate)
+    return () => window.removeEventListener('repository:updated', handleUpdate)
   }, [])
 
   return (

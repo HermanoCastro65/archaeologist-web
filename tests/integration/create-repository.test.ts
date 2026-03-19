@@ -4,7 +4,7 @@ import { CreateRepositoryUseCase } from '@/modules/repositories/application/crea
 import { randomUUID } from 'crypto'
 
 describe('CreateRepositoryUseCase', () => {
-  it('should create repository in database', async () => {
+  it('should persist repository', async () => {
     const user = await prisma.user.create({
       data: {
         id: randomUUID(),

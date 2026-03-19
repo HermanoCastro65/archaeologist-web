@@ -1,12 +1,20 @@
+import { cn } from '@/lib/utils'
+
 type Props = {
   placeholder?: string
 } & React.InputHTMLAttributes<HTMLInputElement>
 
-export default function Input(props: Props) {
+export default function Input({ className, ...props }: Props) {
   return (
     <input
       {...props}
-      className="w-full px-4 py-2 bg-panel border border-border rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+      className={cn(
+        'w-full px-4 py-2 rounded-md bg-panel border border-border text-white',
+        'placeholder:text-graySoft',
+        'focus:outline-none focus:ring-2 focus:ring-matrixSoft focus:border-matrix',
+        'transition-all duration-200',
+        className
+      )}
     />
   )
 }

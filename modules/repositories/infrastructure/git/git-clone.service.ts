@@ -7,13 +7,12 @@ export class GitCloneService {
     const workspaceRoot = path.resolve(process.cwd(), 'workspace')
     const workspace = path.resolve(workspaceRoot, repositoryId)
 
-    await fs.rm(workspaceRoot, { recursive: true, force: true })
-
+    await fs.rm(workspace, { recursive: true, force: true })
     await fs.mkdir(workspaceRoot, { recursive: true })
 
-    const git = simpleGit(workspaceRoot)
+    const git = simpleGit()
 
-    await git.clone(url, repositoryId, ['--depth', '1'])
+    await git.clone(url, workspace, ['--depth', '1'])
 
     return workspace
   }

@@ -8,13 +8,13 @@ interface CreateRepositoryInput {
 }
 
 export class CreateRepositoryUseCase {
-  async execute(input: CreateRepositoryInput): Promise<Repository> {
-    const repoUrl = new RepositoryUrl(input.url)
+  async execute({ url, userId }: CreateRepositoryInput): Promise<Repository> {
+    const repoUrl = new RepositoryUrl(url)
 
     const existing = await prisma.repository.findFirst({
       where: {
         url: repoUrl.value,
-        userId: input.userId,
+        userId,
       },
     })
 
@@ -28,17 +28,17 @@ export class CreateRepositoryUseCase {
     }
 
     await prisma.user.upsert({
-      where: { id: input.userId },
+      where: { id: userId },
       update: {},
       create: {
-        id: input.userId,
-        email: `${input.userId}@placeholder.com`,
+        id: userId,
+        email: `${userId}@placeholder.com`,
       },
     })
 
     const repository = new Repository({
       url: repoUrl,
-      userId: input.userId,
+      userId,
     })
 
     await prisma.repository.create({
@@ -48,7 +48,7 @@ export class CreateRepositoryUseCase {
         owner: repository.owner,
         name: repository.name,
         provider: repository.provider,
-        userId: input.userId,
+        userId,
       },
     })
 

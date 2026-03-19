@@ -9,5 +9,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup-test-db.ts'],
     testTimeout: 10000,
     clearMocks: true,
+    include: ['tests/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['workspace/**', 'node_modules/**'],
+    maxWorkers: 1,
   },
 })

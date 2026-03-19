@@ -20,27 +20,28 @@ export class ScanRepositoryUseCase {
       },
     })
 
+    let workspace = ''
+
     try {
       const git = new GitCloneService()
 
-      const workspace = await git.cloneRepository(repo.url, repo.id)
+      workspace = await git.cloneRepository(repo.url, repo.id)
 
       const manager = new WorkspaceManager()
 
       const files = await manager.listFiles(workspace)
 
-      const batch = []
-
-      for (const file of files) {
-        const stats = await fs.stat(file)
-
-        batch.push({
-          repositoryId,
-          scanId: scan.id,
-          path: file,
-          size: stats.size,
+      const batch = await Promise.all(
+        files.map(async (file) => {
+          const stats = await fs.stat(file)
+          return {
+            repositoryId,
+            scanId: scan.id,
+            path: file,
+            size: stats.size,
+          }
         })
-      }
+      )
 
       if (batch.length > 0) {
         await prisma.repositoryFile.createMany({
@@ -62,7 +63,7 @@ export class ScanRepositoryUseCase {
         scanId: scan.id,
         filesIndexed: files.length,
       }
-    } catch (error) {
+    } catch {
       await prisma.repositoryScan.update({
         where: { id: scan.id },
         data: {
@@ -72,6 +73,10 @@ export class ScanRepositoryUseCase {
       })
 
       throw new Error('Repository not found or cannot be cloned')
+    } finally {
+      if (workspace) {
+        await fs.rm(workspace, { recursive: true, force: true })
+      }
     }
   }
 }

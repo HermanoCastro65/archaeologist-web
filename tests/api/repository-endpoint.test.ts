@@ -1,13 +1,17 @@
 import { describe, it, expect } from 'vitest'
 
 describe('Repository API', () => {
-  it('should return mocked scan result', async () => {
-    const mockResponse = {
+  it('should return valid scan response shape', async () => {
+    const response = {
       repositoryId: 'mock-id',
       filesIndexed: 10,
     }
 
-    expect(mockResponse.repositoryId).toBeDefined()
-    expect(mockResponse.filesIndexed).toBeGreaterThan(0)
+    expect(response).toMatchObject({
+      repositoryId: expect.any(String),
+      filesIndexed: expect.any(Number),
+    })
+
+    expect(response.filesIndexed).toBeGreaterThan(0)
   })
 })
