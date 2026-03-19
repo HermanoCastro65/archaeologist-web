@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import RepositoryForm from '@/components/dashboard/RepositoryForm'
+import ScanResult from '@/components/dashboard/ScanResult'
+import { AnimatePresence } from 'framer-motion'
 
 export default function DashboardPage() {
   const [result, setResult] = useState<{
@@ -11,36 +13,42 @@ export default function DashboardPage() {
   } | null>(null)
 
   const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
 
   async function scan(url: string) {
+    setLoading(true)
     setError(null)
     setResult(null)
 
-    const res = await fetch('/api/repositories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    })
-
-    let data: any = null
-
     try {
-      data = await res.json()
-    } catch {
-      setError('Unexpected error')
-      return
-    }
+      const res = await fetch('/api/repositories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
 
-    if (!res.ok) {
-      setError(data?.error ?? 'Failed to scan repository')
-      return
-    }
+      let data: any = null
 
-    setResult({
-      repositoryId: data.repositoryId,
-      repositoryName: data.repositoryName,
-      files: data.files,
-    })
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error('Unexpected error')
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error ?? 'Failed to scan repository')
+      }
+
+      setResult({
+        repositoryId: data.repositoryId,
+        repositoryName: data.repositoryName,
+        files: data.files,
+      })
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -51,17 +59,19 @@ export default function DashboardPage() {
 
       <RepositoryForm onSubmit={scan} />
 
-      {error && <p className="text-red-400 mt-4">{error}</p>}
+      {loading && <p className="text-matrixSoft mt-4 animate-pulse">Scanning repository...</p>}
 
-      {result && (
-        <div className="mt-6 border border-border rounded-lg p-6 bg-panel/40">
-          <p className="text-sm text-graySoft mb-1">Repository</p>
-          <p className="text-primary font-mono mb-4">{result.repositoryName}</p>
+      <AnimatePresence mode="wait">
+        {error && !loading && <p className="text-red-400 mt-4">{error}</p>}
+      </AnimatePresence>
 
-          <p className="text-sm text-graySoft mb-1">Files indexed</p>
-          <p className="text-primary text-xl font-bold">{result.files}</p>
-        </div>
-      )}
+      <AnimatePresence mode="wait">
+        {result && !loading && (
+          <div className="mt-6">
+            <ScanResult repositoryName={result.repositoryName} files={result.files} />
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

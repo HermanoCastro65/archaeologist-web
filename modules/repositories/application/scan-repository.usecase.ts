@@ -23,12 +23,10 @@ export class ScanRepositoryUseCase {
       const git = new GitCloneService()
       const workspace = await git.cloneRepository(repo.url, repo.id)
 
-      let files: string[] = []
+      const files = await git.listTrackedFiles(workspace)
 
-      try {
-        files = await git.listTrackedFiles(workspace)
-      } catch {
-        files = []
+      if (!files.length) {
+        throw new Error('Repository not found or empty')
       }
 
       const data = await Promise.all(
@@ -47,11 +45,9 @@ export class ScanRepositoryUseCase {
         where: { repositoryId },
       })
 
-      if (data.length) {
-        await prisma.repositoryFile.createMany({
-          data,
-        })
-      }
+      await prisma.repositoryFile.createMany({
+        data,
+      })
 
       await prisma.repositoryScan.update({
         where: { id: scan.id },
@@ -66,7 +62,7 @@ export class ScanRepositoryUseCase {
         scanId: scan.id,
         filesIndexed: files.length,
       }
-    } catch {
+    } catch (error: any) {
       await prisma.repositoryScan.update({
         where: { id: scan.id },
         data: {
@@ -75,10 +71,11 @@ export class ScanRepositoryUseCase {
         },
       })
 
-      return {
-        scanId: scan.id,
-        filesIndexed: 0,
-      }
+      throw new Error(
+        error?.message === 'Repository not found or empty'
+          ? 'Repository not found'
+          : 'Repository not found or cannot be cloned'
+      )
     }
   }
 }

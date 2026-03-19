@@ -42,7 +42,14 @@ export class CreateRepositoryUseCase {
     })
 
     await prisma.repository.create({
-      data: repository.toJSON(),
+      data: {
+        id: repository.id,
+        url: repository.url.value,
+        owner: repository.owner,
+        name: repository.name,
+        provider: repository.provider,
+        userId,
+      },
     })
 
     return repository

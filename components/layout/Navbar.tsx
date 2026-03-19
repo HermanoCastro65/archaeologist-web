@@ -6,12 +6,13 @@ import { useSession } from 'next-auth/react'
 import LoginButton from '../LoginButton'
 import LogoutButton from '../LogoutButton'
 import UserAvatar from './UserAvatar'
+import { cn } from '@/lib/utils'
 
 export default function Navbar() {
   const { data } = useSession()
 
   return (
-    <header className="border-b border-border bg-panel">
+    <header className="border-b border-border bg-panel/80 backdrop-blur supports-[backdrop-filter]:bg-panel/60">
       <div className="max-w-6xl mx-auto pl-2 pr-6 flex items-center justify-between h-[120px]">
         <Link href="/" className="flex items-center h-full">
           <Image
@@ -25,20 +26,12 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-6 text-sm text-graySoft">
-          <Link href="/" className="hover:text-white transition">
-            Home
-          </Link>
-
-          <Link href="/dashboard" className="hover:text-white transition">
-            Dashboard
-          </Link>
-
-          <Link href="/repositories" className="hover:text-white transition">
-            Repositories
-          </Link>
+          <NavLink href="/">Home</NavLink>
+          <NavLink href="/dashboard">Dashboard</NavLink>
+          <NavLink href="/repositories">Repositories</NavLink>
 
           {data ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pl-2 border-l border-border">
               <UserAvatar />
               <LogoutButton />
             </div>
@@ -48,5 +41,20 @@ export default function Navbar() {
         </nav>
       </div>
     </header>
+  )
+}
+
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'relative transition-colors duration-200 hover:text-white',
+        'after:absolute after:left-0 after:-bottom-1 after:h-[1px] after:w-0 after:bg-matrix',
+        'hover:after:w-full after:transition-all after:duration-300'
+      )}
+    >
+      {children}
+    </Link>
   )
 }
