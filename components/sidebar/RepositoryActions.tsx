@@ -2,24 +2,61 @@
 
 import { useState, useRef, useEffect } from 'react'
 
-export default function RepositoryActions({ id, reload }: { id: string; reload: () => void }) {
+export default function RepositoryActions({
+  id,
+  reload,
+  isArchived,
+}: {
+  id: string
+  reload: () => void
+  isArchived?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  async function handleDelete() {
-    await fetch(`/api/repositories/${id}`, {
-      method: 'DELETE',
+  function handleRename() {
+    window.dispatchEvent(
+      new CustomEvent('repository:start-rename', {
+        detail: { id },
+      })
+    )
+    setOpen(false)
+  }
+
+  async function handleArchive() {
+    const res = await fetch(`/api/repositories/${id}/archive`, {
+      method: 'PATCH',
     })
 
-    reload()
+    if (res.ok) {
+      window.dispatchEvent(new Event('repository:updated'))
+      reload()
+    }
+
     setOpen(false)
   }
 
-  function handleRename() {
+  async function handleUnarchive() {
+    const res = await fetch(`/api/repositories/${id}/unarchive`, {
+      method: 'PATCH',
+    })
+
+    if (res.ok) {
+      window.dispatchEvent(new Event('repository:updated'))
+      reload()
+    }
+
     setOpen(false)
   }
 
-  function handleArchive() {
+  function handleDelete() {
+    fetch(`/api/repositories/${id}`, {
+      method: 'DELETE',
+    }).then(() => {
+      window.dispatchEvent(new Event('repository:updated'))
+      reload()
+    })
+
     setOpen(false)
   }
 
@@ -45,19 +82,32 @@ export default function RepositoryActions({ id, reload }: { id: string; reload: 
 
       {open && (
         <div className="absolute right-0 bottom-6 w-36 bg-panel border border-border rounded-md shadow-lg z-50 overflow-hidden">
-          <button
-            onClick={handleRename}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-black/40"
-          >
-            Rename
-          </button>
+          {!isArchived && (
+            <>
+              <button
+                onClick={handleRename}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-black/40"
+              >
+                Rename
+              </button>
 
-          <button
-            onClick={handleArchive}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-black/40"
-          >
-            Archive
-          </button>
+              <button
+                onClick={handleArchive}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-black/40"
+              >
+                Archive
+              </button>
+            </>
+          )}
+
+          {isArchived && (
+            <button
+              onClick={handleUnarchive}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-black/40"
+            >
+              Reactivate
+            </button>
+          )}
 
           <button
             onClick={handleDelete}

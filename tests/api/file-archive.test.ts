@@ -7,7 +7,7 @@ vi.mock('next-auth', () => ({
 }))
 
 import { getServerSession } from 'next-auth'
-import { PATCH } from '@/app/api/files/[id]/archive/route'
+import { PATCH } from '@/app/api/repositories/[id]/archive/route'
 
 describe('PATCH /api/files/[id]/archive', () => {
   it('should archive file', async () => {

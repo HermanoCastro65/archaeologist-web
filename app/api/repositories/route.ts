@@ -39,6 +39,7 @@ export async function GET() {
       owner: r.owner,
       name: r.name,
       files: latestScanMap.get(r.id) ?? 0,
+      isArchived: r.isArchived,
     }))
     .filter((r) => r.files > 0)
 

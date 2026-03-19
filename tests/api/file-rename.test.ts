@@ -7,7 +7,7 @@ vi.mock('next-auth', () => ({
 }))
 
 import { getServerSession } from 'next-auth'
-import { PATCH } from '@/app/api/files/[id]/rename/route'
+import { PATCH } from '@/app/api/repositories/[id]/rename/route'
 
 describe('PATCH /api/files/[id]/rename', () => {
   it('should rename file', async () => {
