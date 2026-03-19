@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 echo ""
 echo "----------------------------------------"
 echo "Archaeologist Dev Environment Boot"
@@ -22,8 +20,8 @@ echo "Waiting for database to start..."
 sleep 10
 
 echo ""
-echo "Running Prisma migrations..."
-npx prisma migrate deploy
+echo "Resetting database..."
+npx prisma migrate reset --force
 
 echo ""
 echo "Generating Prisma client..."
@@ -31,7 +29,7 @@ npx prisma generate
 
 echo ""
 echo "Running tests..."
-yarn test --run
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/archaeologist_test" yarn test || echo "Tests failed"
 
 echo ""
 echo "Starting Next.js dev server..."

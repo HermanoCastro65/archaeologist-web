@@ -6,11 +6,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./tests/setup-test-db.ts'],
+    setupFiles: ['./tests/setup-test-db.ts', './tests/setup-db.ts'],
     testTimeout: 10000,
     clearMocks: true,
     include: ['tests/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['workspace/**', 'node_modules/**'],
     maxWorkers: 1,
+    isolate: false,
   },
 })
