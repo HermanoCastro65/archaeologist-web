@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET } from '@/app/api/repositories/route'
 import { prisma } from '@/lib/db/prisma'
 import { randomUUID } from 'crypto'
+import { resetDatabase } from '../utils/reset-db'
 
 vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
@@ -10,6 +11,10 @@ vi.mock('next-auth', () => ({
 import { getServerSession } from 'next-auth'
 
 describe('GET /api/repositories', () => {
+  beforeEach(async () => {
+    await resetDatabase()
+  })
+
   it('should return only valid repositories with files > 0', async () => {
     const userId = randomUUID()
 
@@ -35,12 +40,21 @@ describe('GET /api/repositories', () => {
       },
     })
 
-    await prisma.repositoryScan.create({
+    const scanValid = await prisma.repositoryScan.create({
       data: {
         repositoryId: repoValid.id,
         status: 'finished',
         filesCount: 10,
       },
+    })
+
+    await prisma.repositoryFile.createMany({
+      data: Array.from({ length: 10 }).map((_, i) => ({
+        repositoryId: repoValid.id,
+        scanId: scanValid.id,
+        path: `/file-${i}.ts`,
+        size: 100,
+      })),
     })
 
     const repoInvalid = await prisma.repository.create({
@@ -54,7 +68,7 @@ describe('GET /api/repositories', () => {
       },
     })
 
-    await prisma.repositoryScan.create({
+    const scanInvalid = await prisma.repositoryScan.create({
       data: {
         repositoryId: repoInvalid.id,
         status: 'finished',
