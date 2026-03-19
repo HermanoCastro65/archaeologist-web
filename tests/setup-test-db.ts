@@ -4,17 +4,13 @@ import path from 'path'
 
 process.env.DATABASE_URL = 'postgresql://postgres:postgres@localhost:5433/archaeologist_test'
 
-execSync('npx prisma migrate deploy', {
-  stdio: 'inherit',
-})
+execSync('npx prisma migrate deploy', { stdio: 'inherit' })
 
 export async function cleanWorkspace() {
   const workspace = path.join(process.cwd(), 'workspace')
 
-  try {
-    await fs.rm(workspace, {
-      recursive: true,
-      force: true,
-    })
-  } catch {}
+  await fs.rm(workspace, {
+    recursive: true,
+    force: true,
+  })
 }
