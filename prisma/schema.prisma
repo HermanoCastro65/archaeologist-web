@@ -115,9 +115,13 @@ model RepositoryFile {
 
   hash String?
 
+  isArchived Boolean @default(false)
+  deletedAt  DateTime?
+
   createdAt DateTime @default(now())
 
   @@unique([repositoryId, path])
   @@index([repositoryId])
   @@index([scanId])
+  @@index([isArchived])
 }
