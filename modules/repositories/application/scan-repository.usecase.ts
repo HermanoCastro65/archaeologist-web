@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma'
 import { GitCloneService } from '../infrastructure/git/git-clone.service'
+import { WorkspaceManager } from '../infrastructure/workspace/workspace-manager'
 import fs from 'fs/promises'
 
 export class ScanRepositoryUseCase {
@@ -19,17 +20,18 @@ export class ScanRepositoryUseCase {
       },
     })
 
+    let workspace = ''
+
     try {
       const git = new GitCloneService()
-      const workspace = await git.cloneRepository(repo.url, repo.id)
 
-      const files = await git.listTrackedFiles(workspace)
+      workspace = await git.cloneRepository(repo.url, repo.id)
 
-      if (!files.length) {
-        throw new Error('Repository not found or empty')
-      }
+      const manager = new WorkspaceManager()
 
-      const data = await Promise.all(
+      const files = await manager.listFiles(workspace)
+
+      const batch = await Promise.all(
         files.map(async (file) => {
           const stats = await fs.stat(file)
           return {
@@ -41,13 +43,12 @@ export class ScanRepositoryUseCase {
         })
       )
 
-      await prisma.repositoryFile.deleteMany({
-        where: { repositoryId },
-      })
-
-      await prisma.repositoryFile.createMany({
-        data,
-      })
+      if (batch.length > 0) {
+        await prisma.repositoryFile.createMany({
+          data: batch,
+          skipDuplicates: true,
+        })
+      }
 
       await prisma.repositoryScan.update({
         where: { id: scan.id },
@@ -62,7 +63,7 @@ export class ScanRepositoryUseCase {
         scanId: scan.id,
         filesIndexed: files.length,
       }
-    } catch (error: any) {
+    } catch {
       await prisma.repositoryScan.update({
         where: { id: scan.id },
         data: {
@@ -71,11 +72,11 @@ export class ScanRepositoryUseCase {
         },
       })
 
-      throw new Error(
-        error?.message === 'Repository not found or empty'
-          ? 'Repository not found'
-          : 'Repository not found or cannot be cloned'
-      )
+      throw new Error('Repository not found or cannot be cloned')
+    } finally {
+      if (workspace) {
+        await fs.rm(workspace, { recursive: true, force: true })
+      }
     }
   }
 }

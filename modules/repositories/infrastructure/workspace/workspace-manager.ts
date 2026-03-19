@@ -6,24 +6,24 @@ export class WorkspaceManager {
   async listFiles(directory: string): Promise<string[]> {
     const files: string[] = []
 
-    await this.walk(directory, files)
+    async function walk(dir: string) {
+      const entries = await fs.readdir(dir, { withFileTypes: true })
 
-    return files
-  }
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name)
 
-  private async walk(dir: string, files: string[]) {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
+        if (shouldIgnore(fullPath)) continue
 
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name)
-
-      if (shouldIgnore(fullPath)) continue
-
-      if (entry.isDirectory()) {
-        await this.walk(fullPath, files)
-      } else {
-        files.push(fullPath)
+        if (entry.isDirectory()) {
+          await walk(fullPath)
+        } else {
+          files.push(fullPath)
+        }
       }
     }
+
+    await walk(directory)
+
+    return files
   }
 }
