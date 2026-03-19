@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db/prisma'
 import { GitCloneService } from '../infrastructure/git/git-clone.service'
-import { WorkspaceManager } from '../infrastructure/workspace/workspace-manager'
 import fs from 'fs/promises'
 
 export class ScanRepositoryUseCase {
@@ -22,30 +21,35 @@ export class ScanRepositoryUseCase {
 
     try {
       const git = new GitCloneService()
-
       const workspace = await git.cloneRepository(repo.url, repo.id)
 
-      const manager = new WorkspaceManager()
+      let files: string[] = []
 
-      const files = await manager.listFiles(workspace)
-
-      const batch = []
-
-      for (const file of files) {
-        const stats = await fs.stat(file)
-
-        batch.push({
-          repositoryId,
-          scanId: scan.id,
-          path: file,
-          size: stats.size,
-        })
+      try {
+        files = await git.listTrackedFiles(workspace)
+      } catch {
+        files = []
       }
 
-      if (batch.length > 0) {
+      const data = await Promise.all(
+        files.map(async (file) => {
+          const stats = await fs.stat(file)
+          return {
+            repositoryId,
+            scanId: scan.id,
+            path: file,
+            size: stats.size,
+          }
+        })
+      )
+
+      await prisma.repositoryFile.deleteMany({
+        where: { repositoryId },
+      })
+
+      if (data.length) {
         await prisma.repositoryFile.createMany({
-          data: batch,
-          skipDuplicates: true,
+          data,
         })
       }
 
@@ -62,7 +66,7 @@ export class ScanRepositoryUseCase {
         scanId: scan.id,
         filesIndexed: files.length,
       }
-    } catch (error) {
+    } catch {
       await prisma.repositoryScan.update({
         where: { id: scan.id },
         data: {
@@ -71,7 +75,10 @@ export class ScanRepositoryUseCase {
         },
       })
 
-      throw new Error('Repository not found or cannot be cloned')
+      return {
+        scanId: scan.id,
+        filesIndexed: 0,
+      }
     }
   }
 }

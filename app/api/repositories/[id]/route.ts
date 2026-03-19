@@ -3,18 +3,22 @@ import { prisma } from '@/lib/db/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  await prisma.repository.delete({
-    where: {
-      id: params.id,
-    },
-  })
+  try {
+    await prisma.repository.delete({
+      where: {
+        id: params.id,
+      },
+    })
 
-  return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Repository not found' }, { status: 404 })
+  }
 }

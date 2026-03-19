@@ -11,29 +11,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { url } = await req.json()
-
   try {
-    const createRepo = new CreateRepositoryUseCase()
+    const body = await req.json()
 
-    const repository = await createRepo.execute({
-      url,
+    if (!body?.url) {
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    }
+
+    const createRepository = new CreateRepositoryUseCase()
+    const repository = await createRepository.execute({
+      url: body.url,
       userId: session.user.id,
     })
 
     const scanner = new ScanRepositoryUseCase()
-
     const result = await scanner.execute(repository.id)
 
     return NextResponse.json({
       repositoryId: repository.id,
-      repositoryName: `${repository.owner}/${repository.name}`,
+      repositoryName: repository.fullName,
       files: result.filesIndexed,
+      filesIndexed: result.filesIndexed,
     })
   } catch (error: any) {
     return NextResponse.json(
       {
-        error: error?.message || 'Repository not found or cannot be cloned',
+        error: error?.message ?? 'Unexpected error',
       },
       { status: 400 }
     )
