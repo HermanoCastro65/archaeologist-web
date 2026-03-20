@@ -46,19 +46,12 @@ export async function POST(req: Request) {
     const result = await scanner.execute(repository.id)
 
     if (result.filesIndexed === 0) {
+      await prisma.repository.deleteMany({
+        where: { id: repository.id },
+      })
+
       return NextResponse.json({ error: 'Repository not found' }, { status: 400 })
     }
-
-    await prisma.repository.create({
-      data: {
-        id: repository.id,
-        url: repository.url.value,
-        owner: repository.owner,
-        name: repository.name,
-        provider: repository.provider,
-        userId: repository.userId,
-      },
-    })
 
     return NextResponse.json({
       repositoryId: repository.id,
