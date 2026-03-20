@@ -6,25 +6,32 @@ echo "Archaeologist Dev Environment Boot"
 echo "----------------------------------------"
 echo ""
 
-echo "Stopping Docker containers..."
-docker compose -f docker/docker-compose.yml down
+echo "Killing Node processes..."
+taskkill /F /IM node.exe 2>nul || true
 
-echo "Removing Docker volumes..."
-docker compose -f docker/docker-compose.yml down -v
+echo "Cleaning Prisma..."
+rmdir /s /q node_modules\.prisma 2>nul || true
 
-echo "Starting Docker containers..."
+echo ""
+echo "Starting Docker..."
 docker compose -f docker/docker-compose.yml up -d
 
 echo ""
-echo "Waiting for database to start..."
+echo "Waiting DB..."
 sleep 5
 
 echo ""
-echo "- Resetting database... generating Prisma client..."
-echo "- Generating Prisma client..."
-echo "- Running tests..."
+echo "Generating Prisma (dataproxy)..."
+npx prisma generate --no-engine
+
+echo ""
+echo "Syncing DB..."
+npx prisma db push
+
+echo ""
+echo "Running tests..."
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/archaeologist_test" yarn test || echo "Tests failed"
 
 echo ""
-echo "Starting Next.js dev server..."
-yarn dev
+echo "Starting app..."
+PRISMA_CLIENT_ENGINE_TYPE=dataproxy yarn dev
