@@ -51,3 +51,25 @@ button:active {
 .animate-slide-in {
   animation: slide-in 0.4s ease-out;
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00ff9c;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00cc7a;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00ff9c rgba(0, 0, 0, 0.6);
+}

@@ -38,9 +38,7 @@ export default function Sidebar() {
         setRepos(active)
         setArchived(archivedList)
       }
-    } catch (err) {
-      console.error('SIDEBAR ERROR:', err)
-    }
+    } catch {}
   }
 
   useEffect(() => {
@@ -48,7 +46,14 @@ export default function Sidebar() {
   }, [])
 
   useEffect(() => {
-    function handleUpdate() {
+    function handleUpdate(e: any) {
+      const { id, type } = e.detail || {}
+
+      if (type === 'delete') {
+        setRepos((prev) => prev.filter((r) => r.id !== id))
+        setArchived((prev) => prev.filter((r) => r.id !== id))
+      }
+
       load()
     }
 

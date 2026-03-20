@@ -6,10 +6,6 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
     const { id } = await context.params
     const body = await req.json()
 
-    if (!body?.name) {
-      return NextResponse.json({ error: 'Invalid name' }, { status: 400 })
-    }
-
     const updated = await prisma.repository.update({
       where: { id },
       data: {

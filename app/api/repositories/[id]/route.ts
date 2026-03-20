@@ -74,3 +74,26 @@ export async function POST(req: Request) {
     )
   }
 }
+
+export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await context.params
+
+    await prisma.repositoryFile.deleteMany({
+      where: { repositoryId: id },
+    })
+
+    await prisma.repositoryScan.deleteMany({
+      where: { repositoryId: id },
+    })
+
+    await prisma.repository.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('DELETE ERROR FULL:', error)
+    return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+  }
+}

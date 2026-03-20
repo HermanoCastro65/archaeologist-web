@@ -14,24 +14,24 @@ export default function RepositoryActions({
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  function handleRename() {
-    window.dispatchEvent(
-      new CustomEvent('repository:start-rename', {
-        detail: { id },
-      })
-    )
-    setOpen(false)
-  }
-
   async function handleArchive() {
     const res = await fetch(`/api/repositories/${id}/archive`, {
       method: 'PATCH',
     })
 
-    if (res.ok) {
-      window.dispatchEvent(new Event('repository:updated'))
-      reload()
-    }
+    if (!res.ok) return
+
+    const data = await res.json()
+
+    window.dispatchEvent(
+      new CustomEvent('repository:updated', {
+        detail: {
+          id,
+          type: 'archive',
+          isArchived: data.isArchived,
+        },
+      })
+    )
 
     setOpen(false)
   }
@@ -41,21 +41,40 @@ export default function RepositoryActions({
       method: 'PATCH',
     })
 
-    if (res.ok) {
-      window.dispatchEvent(new Event('repository:updated'))
-      reload()
-    }
+    if (!res.ok) return
+
+    window.dispatchEvent(
+      new CustomEvent('repository:updated', {
+        detail: { id, type: 'unarchive' },
+      })
+    )
 
     setOpen(false)
   }
 
-  function handleDelete() {
-    fetch(`/api/repositories/${id}`, {
+  async function handleDelete() {
+    const res = await fetch(`/api/repositories/${id}`, {
       method: 'DELETE',
-    }).then(() => {
-      window.dispatchEvent(new Event('repository:updated'))
-      reload()
     })
+
+    if (!res.ok) return
+
+    window.dispatchEvent(
+      new CustomEvent('repository:updated', {
+        detail: { id, type: 'delete' },
+      })
+    )
+
+    reload()
+    setOpen(false)
+  }
+
+  function handleRename() {
+    window.dispatchEvent(
+      new CustomEvent('repository:start-rename', {
+        detail: { id },
+      })
+    )
 
     setOpen(false)
   }
@@ -72,7 +91,7 @@ export default function RepositoryActions({
   }, [])
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative z-[9999]" ref={ref}>
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="text-graySoft hover:text-white text-sm px-1"
@@ -81,8 +100,8 @@ export default function RepositoryActions({
       </button>
 
       {open && (
-        <div className="absolute right-0 bottom-6 w-36 bg-panel border border-border rounded-md shadow-lg z-50 overflow-hidden">
-          {!isArchived && (
+        <div className="absolute right-0 top-6 w-36 bg-panel border border-border rounded-md shadow-lg z-[9999] overflow-hidden">
+          {!isArchived ? (
             <>
               <button
                 onClick={handleRename}
@@ -98,14 +117,12 @@ export default function RepositoryActions({
                 Archive
               </button>
             </>
-          )}
-
-          {isArchived && (
+          ) : (
             <button
               onClick={handleUnarchive}
               className="w-full text-left px-3 py-2 text-sm hover:bg-black/40"
             >
-              Reactivate
+              Unarchive
             </button>
           )}
 

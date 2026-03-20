@@ -6,16 +6,11 @@ vi.mock('next-auth', () => ({
   getServerSession: vi.fn(),
 }))
 
-import { getServerSession } from 'next-auth'
-import { DELETE } from '@/app/api/files/[id]/delete/route'
+import { DELETE } from '@/app/api/repositories/[id]/delete/route'
 
 describe('DELETE /api/files/[id]/delete', () => {
   it('should delete file', async () => {
     const userId = randomUUID()
-
-    ;(getServerSession as any).mockResolvedValue({
-      user: { id: userId },
-    })
 
     await prisma.user.create({
       data: {
@@ -30,7 +25,6 @@ describe('DELETE /api/files/[id]/delete', () => {
         url: 'https://github.com/test/repo',
         owner: 'test',
         name: 'repo',
-        provider: 'github',
         userId,
       },
     })
@@ -39,7 +33,6 @@ describe('DELETE /api/files/[id]/delete', () => {
       data: {
         repositoryId: repo.id,
         status: 'finished',
-        filesCount: 1,
       },
     })
 
@@ -52,16 +45,18 @@ describe('DELETE /api/files/[id]/delete', () => {
       },
     })
 
-    const req = new Request('http://localhost', {
-      method: 'DELETE',
+    const res = await DELETE({} as any, {
+      params: Promise.resolve({ id: file.id }),
     })
 
-    await DELETE(req, { params: { id: file.id } })
+    const data = await res.json()
 
-    const deleted = await prisma.repositoryFile.findUnique({
+    expect(data.success).toBe(true)
+
+    const exists = await prisma.repositoryFile.findUnique({
       where: { id: file.id },
     })
 
-    expect(deleted).toBeNull()
+    expect(exists).toBeNull()
   })
 })

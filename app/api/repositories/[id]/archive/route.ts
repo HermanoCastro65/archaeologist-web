@@ -14,7 +14,7 @@ export async function PATCH(_: Request, context: { params: Promise<{ id: string 
 
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('ARCHIVE ERROR FULL:', error)
+    console.error('ARCHIVE ERROR:', error)
     return NextResponse.json({ error: 'Archive failed' }, { status: 500 })
   }
 }
