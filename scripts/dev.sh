@@ -29,8 +29,17 @@ echo "Syncing DB..."
 npx prisma db push
 
 echo ""
+echo "Preparing TEST DB..."
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/archaeologist_test" npx prisma db push
+
+echo ""
 echo "Running tests..."
-DATABASE_URL="postgresql://postgres:postgres@localhost:5433/archaeologist_test" yarn test || echo "Tests failed"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5433/archaeologist_test" yarn test
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Tests failed. Aborting startup."
+  exit 1
+fi
 
 echo ""
 echo "Starting app..."
