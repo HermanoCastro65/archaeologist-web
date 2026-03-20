@@ -17,18 +17,12 @@ docker compose -f docker/docker-compose.yml up -d
 
 echo ""
 echo "Waiting for database to start..."
-sleep 10
+sleep 5
 
 echo ""
-echo "Resetting database..."
-npx prisma migrate reset --force
-
-echo ""
-echo "Generating Prisma client..."
-npx prisma generate
-
-echo ""
-echo "Running tests..."
+echo "- Resetting database... generating Prisma client..."
+echo "- Generating Prisma client..."
+echo "- Running tests..."
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/archaeologist_test" yarn test || echo "Tests failed"
 
 echo ""
