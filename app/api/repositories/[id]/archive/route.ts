@@ -1,16 +1,46 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
+import { getServerSession } from 'next-auth'
 
-export async function PATCH(_: Request, context: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  _: Request,
+  context: { params: Promise<{ id: string }> | { id: string } }
+) {
   try {
-    const { id } = await context.params
+    const session = await getServerSession()
 
-    const updated = await prisma.repository.update({
-      where: { id },
-      data: {
-        isArchived: true,
-      },
-    })
+    const params = await context.params
+    const id = params.id
+
+    let updated
+
+    try {
+      updated = await prisma.repositoryFile.update({
+        where: { id },
+        data: {
+          isArchived: true,
+        },
+      })
+    } catch {
+      updated = await prisma.repository.update({
+        where: { id },
+        data: {
+          isArchived: true,
+        },
+      })
+    }
+
+    if (session?.user?.id) {
+      try {
+        await prisma.repository.updateMany({
+          where: {
+            id: updated.repositoryId ?? id,
+            userId: session.user.id,
+          },
+          data: {},
+        })
+      } catch {}
+    }
 
     return NextResponse.json(updated)
   } catch (error) {
